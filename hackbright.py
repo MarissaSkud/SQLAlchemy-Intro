@@ -42,17 +42,46 @@ def make_new_student(first_name, last_name, github):
     Given a first name, last name, and GitHub account, add student to the
     database and print a confirmation message.
     """
-    pass
+    sql = """INSERT INTO students (first_name, last_name, github)
+            VALUES (:first_name, :last_name, :github) """
+
+    db.session.execute(sql, {'first_name': first_name,
+                            'last_name': last_name,
+                            'github': github})
+
+    db.session.commit()
+
+    print(f"Successfully added student {first_name} {last_name}")
 
 
 def get_project_by_title(title):
     """Given a project title, print information about the project."""
-    pass
+    QUERY = """
+        SELECT title, description, max_grade
+        FROM projects
+        WHERE title = :title """ #SQL and SQLalchemy query, setting the params for what we want
+    
+    db_cursor = db.session.execute(QUERY, {'title': title}) #processes the query and points to the info  
+
+    row = db_cursor.fetchone() #returns a tuple of what was requested in line 60 SELECT
+
+    print(f'The {row[0]} project involves {row[1]} and has a max grade of {row[2]}') 
+    #row[0] = title because it's the first thing requested in line 60 SELECT
 
 
 def get_grade_by_github_title(github, title):
     """Print grade student received for a project."""
-    pass
+    QUERY = """ SELECT student_github, project_title, grade
+        FROM grades
+        WHERE project_title = :title AND student_github = :github """
+        # :title(placeholder) we'll give you that value later in line 79 (db_cursor)
+
+    db_cursor = db.session.execute(QUERY, {'title': title, 'github': github})
+    #:title (placeholder) is referring to the 'title' key. 
+
+    row = db_cursor.fetchone()
+
+    print(f"{row[0]}'s grade for the {row[1]} project was {row[2]}")
 
 
 def assign_grade(github, title, grade):
@@ -91,7 +120,7 @@ def handle_input():
 if __name__ == "__main__":
     connect_to_db(app)
 
-    # handle_input()
+    #handle_input()
 
     # To be tidy, we close our database connection -- though,
     # since this is where our program ends, we'd quit anyway.
